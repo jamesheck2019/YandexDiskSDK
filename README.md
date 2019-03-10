@@ -1,7 +1,9 @@
 # YandexSDK
 
-.NET 4.5.2
-One dependency library [Newtonsoft.Json]
+<ul>
+	<li>.NET 4.5.2</li>
+	<li>One dependency library [Newtonsoft.Json]</li>
+</ul>
 
 ========
 <ul>
