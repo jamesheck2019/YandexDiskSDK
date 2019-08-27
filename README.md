@@ -58,3 +58,21 @@
 	<li>DownloadFileFromPublicFolder</li>
 	<li>==</li>
 </ul>
+
+`Download:`
+[https://github.com/jamesheck2019/YandexSDK/releases](https://github.com/jamesheck2019/YandexSDK/releases)<br>
+`NuGet:`
+[![NuGet version (BlackBeltCoder.Silk)](https://img.shields.io/nuget/v/DeQmaTech.YandexDiskSDK.svg?style=plastic)](https://www.nuget.org/packages/DeQmaTech.YandexDiskSDK/)<br>
+`Help:`
+[https://github.com/jamesheck2019/YandexSDK/wiki](https://github.com/jamesheck2019/YandexSDK/wiki)<br>
+
+# List of functions:
+[https://github.com/jamesheck2019/YandexSDK/blob/master/IClient.cs](https://github.com/jamesheck2019/YandexSDK/blob/master/IClient.cs)
+
+# Code simple:
+```vb.net
+Dim Client As YandexSDK.IClient = New YandexSDK.YClient("xxxxxxxxxxxx", YClient.DestinationType.disk)
+Dim GTokn= YandexSDK.GetToken.Get_Token(GetToken.ResponseType.code, "xxxxxxxx")
+Dim rslt = Await Client.UserInfo()
+Dim rslt = Await Client.ListAllFilesAndFolders("/", YdXutilities.Fields._embedded, Nothing, Nothing, True, Nothing, YdXutilities.Sort.name)
+```
