@@ -1,5 +1,13 @@
 # YandexSDK
 
+`Download:`
+[https://github.com/jamesheck2019/YandexSDK/releases](https://github.com/jamesheck2019/YandexSDK/releases)<br>
+`NuGet:`
+[![NuGet version (BlackBeltCoder.Silk)](https://img.shields.io/nuget/v/DeQmaTech.YandexDiskSDK.svg?style=plastic)](https://www.nuget.org/packages/DeQmaTech.YandexDiskSDK/)<br>
+`Help:`
+[https://github.com/jamesheck2019/YandexSDK/wiki](https://github.com/jamesheck2019/YandexSDK/wiki)<br>
+
+
 <ul>
 	<li>.NET 4.5.2</li>
 	<li>One dependency library [Newtonsoft.Json]</li>
@@ -58,13 +66,6 @@
 	<li>DownloadFileFromPublicFolder</li>
 	<li>==</li>
 </ul>
-
-`Download:`
-[https://github.com/jamesheck2019/YandexSDK/releases](https://github.com/jamesheck2019/YandexSDK/releases)<br>
-`NuGet:`
-[![NuGet version (BlackBeltCoder.Silk)](https://img.shields.io/nuget/v/DeQmaTech.YandexDiskSDK.svg?style=plastic)](https://www.nuget.org/packages/DeQmaTech.YandexDiskSDK/)<br>
-`Help:`
-[https://github.com/jamesheck2019/YandexSDK/wiki](https://github.com/jamesheck2019/YandexSDK/wiki)<br>
 
 # List of functions:
 [https://github.com/jamesheck2019/YandexSDK/blob/master/IClient.cs](https://github.com/jamesheck2019/YandexSDK/blob/master/IClient.cs)
