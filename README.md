@@ -3,77 +3,82 @@
 `Download:`
 [https://github.com/jamesheck2019/YandexSDK/releases](https://github.com/jamesheck2019/YandexSDK/releases)<br>
 `NuGet:`
-[![NuGet version (BlackBeltCoder.Silk)](https://img.shields.io/nuget/v/DeQmaTech.YandexDiskSDK.svg?style=plastic)](https://www.nuget.org/packages/DeQmaTech.YandexDiskSDK/)<br>
+[![NuGet](https://img.shields.io/nuget/v/DeQmaTech.YandexDiskSDK.svg?style=flat-square&logo=nuget)](https://www.nuget.org/packages/DeQmaTech.YandexDiskSDK/)<br>
 `Help:`
 [https://github.com/jamesheck2019/YandexSDK/wiki](https://github.com/jamesheck2019/YandexSDK/wiki)<br>
 
 
-<ul>
-	<li>.NET 4.5.2</li>
-	<li>One dependency library [Newtonsoft.Json]</li>
-</ul>
-
-========
-<ul>
-	<li>Functions list:</li>
-	<li>GetToken</li>
-	<li>ListAllFiles</li>
-	<li>CopyFile</li>
-	<li>MoveFile</li>
-	<li>DeleteFile</li>
-	<li>TrashFile</li>
-	<li>DownloadFile</li>
-	<li>DownloadFileAsStream</li>
-	<li>UploadLocalFile</li>
-	<li>UploadRemoteFile</li>
-	<li>UnPublishFile</li>
-	<li>PublishFile</li>
-	<li>RenameFile</li>
-	<li>CheckIfFileExists</li>
-	<li>PreviewFile</li>
-	<li>==</li>
-	<li>PublishFolder</li>
-	<li>DeleteFolder</li>
-	<li>TrashFolder</li>
-	<li>MoveFolder</li>
-	<li>CopyFolder</li>
-	<li>DownloadFolderAsZip</li>
-	<li>UnPublishFolder</li>
-	<li>RenameFolder</li>
-	<li>CreateDir</li>
-	<li>CheckIfFolderExists</li>
-	<li>==</li>
-	<li>ListAllFilesAndFolders</li>
-	<li>TrashFileFolder</li>
-	<li>MoveAndRenameFileFolder</li>
-	<li>CopyAndRenameFileFolder</li>
-	<li>PublishFileFolder</li>
-	<li>UnPublishFileFolder</li>
-	<li>GetFileFolderMetadata</li>
-	<li>CheckIfFileFolderExists</li>
-	<li>RenameFileFolder</li>
-	<li>==</li>
-	<li>ListAllSharedLinksOfUser</li>
-	<li>UserInfo</li>
-	<li>AddMetaForFile</li>
-	<li>ListLatestUploadedFiles</li>
-	<li>GetDownloadUrl</li>
-	<li>EmptyTrash</li>
-	<li>RestoringFileorFolderFromTrash</li>
-	<li>CopyingMovingDeletingUrluploadingOperationStatus</li>
-	<li>ListPublicLink</li>
-	<li>GetDownloadUrlOfFileInPublicFolder</li>
-	<li>DownloadFileFromPublicFolder</li>
-	<li>==</li>
-</ul>
+**Features**
+* Assemblies for .NET 4.5.2 and .NET Standard 2.0
+* Just one external reference (Newtonsoft.Json)
+* Easy installation using NuGet
+* Upload/Download tracking support
+* Proxy Support
+* Upload/Download cancellation support
 
 # List of functions:
-[https://github.com/jamesheck2019/YandexSDK/blob/master/IClient.cs](https://github.com/jamesheck2019/YandexSDK/blob/master/IClient.cs)
+* ListAllFiles
+* DeleteFile
+* DownloadFile
+* DownloadFileAsStream
+* Upload
+* UploadRemoteFile
+* CheckIfFileFolderExists
+* PreviewFile
+* DeleteFolder
+* DownloadFolderAsZip
+* CreateNewFolder
+* ListAllFilesAndFolders
+* TrashFileFolder
+* MoveAndRenameFileFolder
+* CopyAndRenameFileFolder
+* PublishFileFolder
+* UnPublishFileFolder
+* GetFileFolderMetadata
+* RenameFileFolder
+* ListAllSharedLinksOfUser
+* UserInfo
+* AddMetaForFile
+* ListLatestUploadedFiles
+* GetDownloadUrl
+* EmptyTrash
+* RestoringFileorFolderFromTrash
+* CopyingMovingDeletingUrluploadingOperationStatus
+* ListPublicLink
+* GetDownloadUrlOfFileInPublicFolder
+* DownloadFileFromPublicFolder
+
+
 
 # Code simple:
-```vb.net
-Dim Client As YandexSDK.IClient = New YandexSDK.YClient("xxxxxxxxxxxx", YClient.DestinationType.disk)
-Dim GTokn= YandexSDK.GetToken.Get_Token(GetToken.ResponseType.code, "xxxxxxxx")
-Dim rslt = Await Client.UserInfo()
-Dim rslt = Await Client.ListAllFilesAndFolders("/", YdXutilities.Fields._embedded, Nothing, Nothing, True, Nothing, YdXutilities.Sort.name)
+**get token**
+```vb
+Dim tkn = YandexDiskSDK.GetToken.OneYearToken(utilities.ResponseType.token, "ClientID_xxxxxx")
+```
+**set client**
+```vb
+Dim Clnt As YandexSDK.IClient = New YandexSDK.ZClient("token_xxxxx",YClient.DestinationType.disk)
+```
+**set client with proxy**
+```vb
+Dim m_proxy = New ZohoDocsSDK.ProxyConfig With {.SetProxy = True, .ProxyIP = "172.0.0.0", .ProxyPort = 80, .ProxyUsername = "usr", .ProxyPassword = "pas"}
+Dim Clnt As YandexSDK.IClient = New YandexSDK.ZClient("token_xxxxxx",YClient.DestinationType.disk,m_proxy)
+```
+**list root files/folders**
+``vb
+Dim rslt = Await Clnt.ListAllFilesAndFolders("", utilities.Fields._embedded, 20, 0, True, Nothing, utilities.Sort.name)
+For Each fle In rslt.FilesList
+    DataGridView1.Rows.Add(fle.Name, fle.PublicUrl, fle.Path, fle.PreviewUrl)
+Next
+For Each fld In rslt.FoldersList
+    DataGridView1.Rows.Add(fld.Name, fld.PublicUrl, fld.Path, fld.PreviewUrl)
+Next
+```
+**create new folder**
+```vb
+ Dim rslt = Await Clnt.CreateNewFolder(Nothing, "thefoldername")
+```
+**delete file**
+```vb
+Dim rslt = Await Clnt.DeleteFile("/mymu.mp3")
 ```
