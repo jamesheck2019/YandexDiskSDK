@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using YandexDiskSDK.JSON;
 using static YandexDiskSDK.utilitiez;
+using static YandexDiskSDK.Basic;
 
 namespace YandexDiskSDK
 {
@@ -19,22 +20,15 @@ namespace YandexDiskSDK
         public async Task<JSON_FolderList> ListAllSharedLinks(ItemTypeEnum Target = ItemTypeEnum.both, Fields Fields = Fields.nothing, PreviewSizeEnum PreviewSize = PreviewSizeEnum.S_150, int Limit = 20, int Offset = 0)
         {
             var parameters = new Dictionary<string, string>();
-            if (Fields != Fields.items || Fields != Fields.type)
-            {
-                parameters.Add("fields", Fields.ToString());
-            }
-
+            if (Fields != Fields.items || Fields != Fields.type) {parameters.Add("fields", Fields.ToString());}
             parameters.Add("limit", Limit.ToString());
             parameters.Add("offset", Offset.ToString());
             parameters.Add("preview_size", stringValueOf(PreviewSize));
-            if (Target != ItemTypeEnum.both)
-            {
-                parameters.Add("type", Target.ToString());
-            }
+            if (Target != ItemTypeEnum.both) {parameters.Add("type", Target.ToString());}
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                var RequestUri = new Base.pUri("resources/public", parameters);
+                var RequestUri = new pUri("resources/public", parameters);
                 using (HttpResponseMessage response = await localHttpClient.GetAsync(RequestUri).ConfigureAwait(false))
                 {
                     var result = await response.Content.ReadAsStringAsync();
@@ -43,13 +37,13 @@ namespace YandexDiskSDK
                         var fin = new JSON_FolderList();
                         fin.limit = Convert.ToInt32(result.Jobj().SelectToken("limit").ToString());
                         fin.offset = Convert.ToInt32(result.Jobj().SelectToken("offset").ToString());
-                        fin._Files = (from c in result.Jobj().SelectToken("items").ToList().Select((i, JSON_FileMetadata) => i).Where(i => i.SelectToken("type").ToString().Equals("file")).Select(i => JsonConvert.DeserializeObject<JSON_FileMetadata>(i.ToString(), Base.JSONhandler)) select c).ToList();
-                        fin._Folders = (from c in result.Jobj().SelectToken("items").ToList().Select((i, JSON_FolderMetadata) => i).Where(i => i.SelectToken("type").ToString().Equals("dir")).Select(i => JsonConvert.DeserializeObject<JSON_FolderMetadata>(i.ToString(), Base.JSONhandler)) select c).ToList();
+                        fin._Files = (from c in result.Jobj().SelectToken("items").ToList().Select((i, JSON_FileMetadata) => i).Where(i => i.SelectToken("type").ToString().Equals("file")).Select(i => JsonConvert.DeserializeObject<JSON_FileMetadata>(i.ToString(), Basic.JSONhandler)) select c).ToList();
+                        fin._Folders = (from c in result.Jobj().SelectToken("items").ToList().Select((i, JSON_FolderMetadata) => i).Where(i => i.SelectToken("type").ToString().Equals("dir")).Select(i => JsonConvert.DeserializeObject<JSON_FolderMetadata>(i.ToString(), Basic.JSONhandler)) select c).ToList();
                         return fin;
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }
@@ -75,22 +69,22 @@ namespace YandexDiskSDK
             parameters.Add("preview_size", stringValueOf(PreviewSize));
             if (Sort.HasValue) { parameters.Add("sort", Sort.ToString()); }
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                var RequestUri = new Base.pUri("public/resources", parameters);
+                var RequestUri = new pUri("public/resources", parameters);
                 using (HttpResponseMessage response = await localHttpClient.GetAsync(RequestUri).ConfigureAwait(false))
                 {
                     var result = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        var fin = JsonConvert.DeserializeObject<JSON_PublicFolder>(result, Base.JSONhandler);
-                        fin.ItemsList._Files = (from c in result.Jobj().SelectToken("_embedded")["items"].ToList().Select((i, JSON_FileMetadata) => i).Where(i => i.SelectToken("type").ToString().Equals("file")).Select(i => JsonConvert.DeserializeObject<JSON_FileMetadata>(i.ToString(), Base.JSONhandler)) select c).ToList();
-                        fin.ItemsList._Folders = (from c in result.Jobj().SelectToken("_embedded")["items"].ToList().Select((i, JSON_FolderMetadata) => i).Where(i => i.SelectToken("type").ToString().Equals("dir")).Select(i => JsonConvert.DeserializeObject<JSON_FolderMetadata>(i.ToString(), Base.JSONhandler)) select c).ToList();
+                        var fin = JsonConvert.DeserializeObject<JSON_PublicFolder>(result, JSONhandler);
+                        fin.ItemsList._Files = (from c in result.Jobj().SelectToken("_embedded")["items"].ToList().Select((i, JSON_FileMetadata) => i).Where(i => i.SelectToken("type").ToString().Equals("file")).Select(i => JsonConvert.DeserializeObject<JSON_FileMetadata>(i.ToString(), Basic.JSONhandler)) select c).ToList();
+                        fin.ItemsList._Folders = (from c in result.Jobj().SelectToken("_embedded")["items"].ToList().Select((i, JSON_FolderMetadata) => i).Where(i => i.SelectToken("type").ToString().Equals("dir")).Select(i => JsonConvert.DeserializeObject<JSON_FolderMetadata>(i.ToString(), Basic.JSONhandler)) select c).ToList();
                         return fin;
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }
@@ -106,13 +100,15 @@ namespace YandexDiskSDK
         }
         public async Task<string> GetDownloadUrlOfFileInPublicFolder2(string FolderPublicKey, string FilePathInsidePublicFolder)
         {
-            var parameters = new Dictionary<string, string>();
-            parameters.Add("public_key", WebUtility.UrlEncode(FolderPublicKey));
-            parameters.Add("path", FilePathInsidePublicFolder);
-
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            var parameters = new Dictionary<string, string>
             {
-                var RequestUri = new Base.pUri("resources/download", parameters);
+                { "public_key", WebUtility.UrlEncode(FolderPublicKey) },
+                { "path", FilePathInsidePublicFolder }
+            };
+
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
+            {
+                var RequestUri = new pUri("resources/download", parameters);
                 using (HttpResponseMessage response = await localHttpClient.GetAsync(RequestUri).ConfigureAwait(false))
                 {
                     var result = await response.Content.ReadAsStringAsync();
@@ -121,7 +117,7 @@ namespace YandexDiskSDK
                     { return result.Jobj().SelectToken("href").ToString(); }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }
@@ -133,13 +129,15 @@ namespace YandexDiskSDK
         public async Task<string> PublicUrlToPublicKey(Uri PublicUrl)
         {
             PublicUrl.Validation(ItemTypeEnum.both);
-            var parameters = new Dictionary<string, string>();
-            parameters.Add("public_key", WebUtility.UrlEncode(PublicUrl.ToString()));
-            parameters.Add("limit", "0");
-
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            var parameters = new Dictionary<string, string>
             {
-                var RequestUri = new Base.pUri("public/resources", parameters);
+                { "public_key", WebUtility.UrlEncode(PublicUrl.ToString()) },
+                { "limit", "0" }
+            };
+
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
+            {
+                var RequestUri = new pUri("public/resources", parameters);
                 using (HttpResponseMessage response = await localHttpClient.GetAsync(RequestUri).ConfigureAwait(false))
                 {
                     var result = await response.Content.ReadAsStringAsync();
@@ -149,7 +147,7 @@ namespace YandexDiskSDK
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }
@@ -161,13 +159,15 @@ namespace YandexDiskSDK
         public async Task<string> PublicUrlToDirectUrl(Uri PublicUrl)
         {
             PublicUrl.Validation(ItemTypeEnum.both);
-            var parameters = new Dictionary<string, string>();
-            parameters.Add("public_key", WebUtility.UrlEncode(PublicUrl.ToString()));
-            parameters.Add("limit", "0");
-
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            var parameters = new Dictionary<string, string>
             {
-                var RequestUri = new Base.pUri("public/resources", parameters);
+                { "public_key", WebUtility.UrlEncode(PublicUrl.ToString()) },
+                { "limit", "0" }
+            };
+
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
+            {
+                var RequestUri = new pUri("public/resources", parameters);
                 using (HttpResponseMessage response = await localHttpClient.GetAsync(RequestUri).ConfigureAwait(false))
                 {
                     var result = await response.Content.ReadAsStringAsync();
@@ -177,7 +177,7 @@ namespace YandexDiskSDK
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }
@@ -189,23 +189,25 @@ namespace YandexDiskSDK
         public async Task<JSON_FileMetadata> Metadata(Uri PublicUrl)
         {
             PublicUrl.Validation(ItemTypeEnum.both);
-            var parameters = new Dictionary<string, string>();
-            parameters.Add("public_key", WebUtility.UrlEncode(PublicUrl.ToString()));
-            parameters.Add("limit", "0");
-
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            var parameters = new Dictionary<string, string>
             {
-                var RequestUri = new Base.pUri("public/resources", parameters);
+                { "public_key", WebUtility.UrlEncode(PublicUrl.ToString()) },
+                { "limit", "0" }
+            };
+
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
+            {
+                var RequestUri = new Basic.pUri("public/resources", parameters);
                 using (HttpResponseMessage response = await localHttpClient.GetAsync(RequestUri).ConfigureAwait(false))
                 {
                     var result = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        return JsonConvert.DeserializeObject<JSON_FileMetadata>(result, Base.JSONhandler);
+                        return JsonConvert.DeserializeObject<JSON_FileMetadata>(result, JSONhandler);
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }
@@ -224,9 +226,9 @@ namespace YandexDiskSDK
 
             try
             {
-                var progressHandler = new System.Net.Http.Handlers.ProgressMessageHandler(new Base.HCHandler());
-                progressHandler.HttpReceiveProgress += (sender, e) => { ReportCls.Report(new ReportStatus { ProgressPercentage = e.ProgressPercentage, BytesTransferred = e.BytesTransferred, TotalBytes = e.TotalBytes, TextStatus = "Downloading..." }); };
-                using (Base.HttpClient localHttpClient = new Base.HttpClient(progressHandler))
+                var progressHandler = new System.Net.Http.Handlers.ProgressMessageHandler(new HCHandler());
+                progressHandler.HttpReceiveProgress += (sender, e) => { ReportCls.Report(new ReportStatus { ProgressPercentage = e.ProgressPercentage, BytesTransferred = e.BytesTransferred, TotalBytes = e.TotalBytes ?? 0, TextStatus = "Downloading..." }); };
+                using (HtpClient localHttpClient = new HtpClient(progressHandler))
                 {
                     using (HttpResponseMessage ResPonse = await localHttpClient.GetAsync(new Uri(meta.DownloadUrl), HttpCompletionOption.ResponseContentRead, token).ConfigureAwait(false))
                     {

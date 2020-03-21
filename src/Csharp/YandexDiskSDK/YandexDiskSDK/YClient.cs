@@ -6,6 +6,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using YandexDiskSDK.JSON;
 using static YandexDiskSDK.utilitiez;
+using static YandexDiskSDK.Basic;
+
 
 namespace YandexDiskSDK
 {
@@ -13,14 +15,17 @@ namespace YandexDiskSDK
     {
         public YClient(string accessToken, ConnectionSettings Settings = null)
         {
-            Base.authToken = accessToken;
-            Base.ConnectionSetting = Settings;
-            if (Settings == null) { Base.m_proxy = null; }
+            authToken = accessToken;
+            ConnectionSetting = Settings;
+            if (Settings == null)
+            {
+                m_proxy = null;
+            }
             else
             {
-                Base.m_proxy = Settings.Proxy;
-                Base.m_CloseConnection = Settings.CloseConnection ?? true;
-                Base.m_TimeOut = Settings.TimeOut ?? TimeSpan.FromMinutes(60);
+                m_proxy = Settings.Proxy;
+                m_CloseConnection = Settings.CloseConnection ?? true;
+                m_TimeOut = Settings.TimeOut ?? TimeSpan.FromMinutes(60);
             }
             ServicePointManager.Expect100Continue = true; ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
         }
@@ -51,19 +56,19 @@ namespace YandexDiskSDK
         #region UserInfo
         public async Task<JSON_UserInfo> UserInfo()
         {
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                using (HttpResponseMessage response = await localHttpClient.GetAsync(new Base.pUri("")).ConfigureAwait(false))
+                using (HttpResponseMessage response = await localHttpClient.GetAsync(new pUri("")).ConfigureAwait(false))
                 {
                     var result = await response.Content.ReadAsStringAsync();
 
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        return JsonConvert.DeserializeObject<JSON_UserInfo>(result, Base.JSONhandler);
+                        return JsonConvert.DeserializeObject<JSON_UserInfo>(result, JSONhandler);
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }
@@ -82,20 +87,20 @@ namespace YandexDiskSDK
                 { "fields", Fields.ToString() },
                 { "limit", Limit.ToString() }
             };
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                using (HttpResponseMessage response = await localHttpClient.GetAsync(new Base.pUri("resources/last-uploaded", parameters)).ConfigureAwait(false))
+                using (HttpResponseMessage response = await localHttpClient.GetAsync(new pUri("resources/last-uploaded", parameters)).ConfigureAwait(false))
                 {
                     var result = await response.Content.ReadAsStringAsync();
 
                     if (response.IsSuccessStatusCode)
                     {
-                        return JsonConvert.DeserializeObject<JSON_FilesList>(result, Base.JSONhandler);
+                        return JsonConvert.DeserializeObject<JSON_FilesList>(result, JSONhandler);
                     }
 
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
 
@@ -108,18 +113,18 @@ namespace YandexDiskSDK
         #region "CopyingMovingDeletingUrluploadingOperationStatus"
         public async Task<JSON_CheckOperationStatus> CheckOperationStatus(string OperationHref)
         {
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
                 using (HttpResponseMessage response = await localHttpClient.GetAsync(new Uri(OperationHref)).ConfigureAwait(false))
                 {
                     var result = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        return JsonConvert.DeserializeObject<JSON_CheckOperationStatus>(result, Base.JSONhandler);
+                        return JsonConvert.DeserializeObject<JSON_CheckOperationStatus>(result, JSONhandler);
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }

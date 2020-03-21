@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using YandexDiskSDK.JSON;
+using static YandexDiskSDK.Basic;
 
 namespace YandexDiskSDK
 {
@@ -39,7 +40,7 @@ namespace YandexDiskSDK
             parameters.Add("client_secret", ClientSecret);
             parameters.Add("device_name", "YandexDiskSDK");
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler { }))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler { }))
             {
                 HttpRequestMessage HtpReqMessage = new HttpRequestMessage(HttpMethod.Post, new Uri("https://oauth.yandex.com/token" + utilitiez.AsQueryString(parameters)));
                 using (HttpResponseMessage response = await localHttpClient.SendAsync(HtpReqMessage, HttpCompletionOption.ResponseContentRead).ConfigureAwait(false))
@@ -48,13 +49,13 @@ namespace YandexDiskSDK
 
                     if (response.IsSuccessStatusCode)
                     {
-                        return JsonConvert.DeserializeObject<JSONexchangingVerificationCodeForToken>(result, Base.JSONhandler);
+                        return JsonConvert.DeserializeObject<JSONexchangingVerificationCodeForToken>(result, JSONhandler);
                     }
 
                     else
                     {
-                        var errorInfo = JsonConvert.DeserializeObject<JSON_Error>(result, Base.JSONhandler);
-                        throw ExceptionCls.CreateException(errorInfo._ErrorMessage, Convert.ToInt32(response.StatusCode));
+                        var errorInfo = JsonConvert.DeserializeObject<JSON_Error>(result, JSONhandler);
+                        throw ExceptionCls.CreateException(errorInfo._ErrorMessage, (int)response.StatusCode);
                     }
 
                 }

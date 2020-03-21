@@ -9,6 +9,7 @@ using System.Net.Http.Handlers;
 using System.Threading;
 using System.Threading.Tasks;
 using YandexDiskSDK.JSON;
+using static YandexDiskSDK.Basic;
 
 namespace YandexDiskSDK
 {
@@ -24,18 +25,20 @@ namespace YandexDiskSDK
         #region Get_AllFilesandFolders_Disk
         public async Task<JSON_FolderList> D_List(bool PreviewCrop = true, utilitiez.PreviewSizeEnum PreviewSize = utilitiez.PreviewSizeEnum.S_150, utilitiez.SortEnum Sort = utilitiez.SortEnum.name, int Limit = 20, int Offset = 0)
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("path", Path ?? "disk:/");
-            parameters.Add("fields", "_embedded");
-            parameters.Add("limit", Limit.ToString());
-            parameters.Add("offset", Offset.ToString());
-            parameters.Add("preview_crop", PreviewCrop.ToString());
-            parameters.Add("preview_size", utilitiez.stringValueOf(PreviewSize));
-            parameters.Add("sort", Sort.ToString());
-
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            var parameters = new Dictionary<string, string>
             {
-                using (HttpResponseMessage response = await localHttpClient.GetAsync(new Base.pUri("resources", parameters)).ConfigureAwait(false))
+                { "path", Path ?? "disk:/" },
+                { "fields", "_embedded" },
+                { "limit", Limit.ToString() },
+                { "offset", Offset.ToString() },
+                { "preview_crop", PreviewCrop.ToString() },
+                { "preview_size", utilitiez.stringValueOf(PreviewSize) },
+                { "sort", Sort.ToString() }
+            };
+
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
+            {
+                using (HttpResponseMessage response = await localHttpClient.GetAsync(new pUri("resources", parameters)).ConfigureAwait(false))
                 {
                     string result = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == HttpStatusCode.OK)
@@ -45,14 +48,14 @@ namespace YandexDiskSDK
                             limit = Convert.ToInt32(result.Jobj().SelectToken("_embedded.limit").ToString()),
                             offset = Convert.ToInt32(result.Jobj().SelectToken("_embedded.offset").ToString()),
                             total = Convert.ToInt32(result.Jobj().SelectToken("_embedded.total").ToString()),
-                            _Files = (from c in result.Jobj().SelectToken("_embedded")["items"].ToList().Select((i, JSON_FileMetadata) => i).Where(i => i.SelectToken("type").ToString() == "file").Select(i => JsonConvert.DeserializeObject<JSON_FileMetadata>(i.ToString(), Base.JSONhandler)) select c).ToList(),
-                            _Folders = (from c in result.Jobj().SelectToken("_embedded")["items"].ToList().Select((i, JSON_FolderMetadata) => i).Where(i => i.SelectToken("type").ToString() == "dir").Select(i => JsonConvert.DeserializeObject<JSON_FolderMetadata>(i.ToString(), Base.JSONhandler)) select c).ToList()
+                            _Files = (from c in result.Jobj().SelectToken("_embedded")["items"].ToList().Select((i, JSON_FileMetadata) => i).Where(i => i.SelectToken("type").ToString() == "file").Select(i => JsonConvert.DeserializeObject<JSON_FileMetadata>(i.ToString(), JSONhandler)) select c).ToList(),
+                            _Folders = (from c in result.Jobj().SelectToken("_embedded")["items"].ToList().Select((i, JSON_FolderMetadata) => i).Where(i => i.SelectToken("type").ToString() == "dir").Select(i => JsonConvert.DeserializeObject<JSON_FolderMetadata>(i.ToString(), JSONhandler)) select c).ToList()
                         };
                         return fin;
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }
@@ -75,18 +78,18 @@ namespace YandexDiskSDK
                 { "media_type", string.Join<utilitiez.FilterEnum>(",", Filter) }
             };
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                using (HttpResponseMessage response = await localHttpClient.GetAsync(new Base.pUri("resources/files", parameters)).ConfigureAwait(false))
+                using (HttpResponseMessage response = await localHttpClient.GetAsync(new pUri("resources/files", parameters)).ConfigureAwait(false))
                 {
                     string result = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        return JsonConvert.DeserializeObject<JSON_FilesList>(result, Base.JSONhandler);
+                        return JsonConvert.DeserializeObject<JSON_FilesList>(result, JSONhandler);
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }
@@ -104,9 +107,9 @@ namespace YandexDiskSDK
                 { "overwrite", OverwriteIfExist.ToString() }
             };
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                HttpRequestMessage HtpReqMessage = new HttpRequestMessage(HttpMethod.Post, new Base.pUri("resources/move", parameters));
+                HttpRequestMessage HtpReqMessage = new HttpRequestMessage(HttpMethod.Post, new pUri("resources/move", parameters));
                 using (HttpResponseMessage response = await localHttpClient.SendAsync(HtpReqMessage, HttpCompletionOption.ResponseContentRead).ConfigureAwait(false))
                 {
                     if (response.StatusCode == HttpStatusCode.Created | response.StatusCode == HttpStatusCode.Accepted)
@@ -116,7 +119,7 @@ namespace YandexDiskSDK
                     else
                     {
                         string result = await response.Content.ReadAsStringAsync();
-                        Base.ShowError(result);
+                        ShowError(result);
                         return false;
                     }
                 }
@@ -134,9 +137,9 @@ namespace YandexDiskSDK
                 { "overwrite", OverwriteIfExist.ToString() }
             };
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                HttpRequestMessage HtpReqMessage = new HttpRequestMessage(HttpMethod.Post, new Base.pUri("resources/copy", parameters));
+                HttpRequestMessage HtpReqMessage = new HttpRequestMessage(HttpMethod.Post, new pUri("resources/copy", parameters));
                 using (HttpResponseMessage response = await localHttpClient.SendAsync(HtpReqMessage, HttpCompletionOption.ResponseContentRead).ConfigureAwait(false))
                 {
                     if (response.StatusCode == HttpStatusCode.Created | response.StatusCode == HttpStatusCode.Accepted)
@@ -146,7 +149,7 @@ namespace YandexDiskSDK
                     else
                     {
                         string result = await response.Content.ReadAsStringAsync();
-                        Base.ShowError(result);
+                        ShowError(result);
                         return false;
                     }
                 }
@@ -164,9 +167,9 @@ namespace YandexDiskSDK
                 { "overwrite", "false" }
             };
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                HttpRequestMessage HtpReqMessage = new HttpRequestMessage(HttpMethod.Post, new Base.pUri("resources/move", parameters));
+                HttpRequestMessage HtpReqMessage = new HttpRequestMessage(HttpMethod.Post, new pUri("resources/move", parameters));
                 using (HttpResponseMessage response = await localHttpClient.SendAsync(HtpReqMessage, HttpCompletionOption.ResponseContentRead).ConfigureAwait(false))
                 {
                     if (response.StatusCode == HttpStatusCode.Created | response.StatusCode == HttpStatusCode.Accepted)
@@ -176,7 +179,7 @@ namespace YandexDiskSDK
                     else
                     {
                         string result = await response.Content.ReadAsStringAsync();
-                        Base.ShowError(result);
+                        ShowError(result);
                         return false;
                     }
                 }
@@ -187,11 +190,11 @@ namespace YandexDiskSDK
         #region _TrashFileFolder
         public async Task<bool> FD_Trash()
         {
-            var parameters = new Dictionary<string, string>{{ "path", Path },{ "permanently", "false" }};
+            var parameters = new Dictionary<string, string> { { "path", Path }, { "permanently", "false" } };
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                using (HttpResponseMessage response = await localHttpClient.DeleteAsync(new Base.pUri("resources", parameters)).ConfigureAwait(false))
+                using (HttpResponseMessage response = await localHttpClient.DeleteAsync(new pUri("resources", parameters)).ConfigureAwait(false))
                 {
                     if (response.StatusCode == HttpStatusCode.NoContent | response.StatusCode == HttpStatusCode.Accepted)
                     {
@@ -200,7 +203,7 @@ namespace YandexDiskSDK
                     else
                     {
                         string result = await response.Content.ReadAsStringAsync();
-                        Base.ShowError(result);
+                        ShowError(result);
                         return false;
                     }
                 }
@@ -213,9 +216,9 @@ namespace YandexDiskSDK
         {
             var parameters = new Dictionary<string, string> { { "path", Path }, { "permanently", "true" } };
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                using (HttpResponseMessage response = await localHttpClient.DeleteAsync(new Base.pUri("resources", parameters)).ConfigureAwait(false))
+                using (HttpResponseMessage response = await localHttpClient.DeleteAsync(new pUri("resources", parameters)).ConfigureAwait(false))
                 {
                     if (response.StatusCode == HttpStatusCode.NoContent | response.StatusCode == HttpStatusCode.Accepted)
                     {
@@ -224,7 +227,7 @@ namespace YandexDiskSDK
                     else
                     {
                         string result = await response.Content.ReadAsStringAsync();
-                        Base.ShowError(result);
+                        ShowError(result);
                         return false;
                     }
                 }
@@ -235,7 +238,7 @@ namespace YandexDiskSDK
         #region _CreateNewFolder
         public async Task<string> D_Create(string FolderName)
         {
-            if (System.IO.Path.HasExtension(this.Path)) {throw new YandexDiskException("DestinationPath Must be Folder Path", 889);}
+            if (System.IO.Path.HasExtension(Path)) { throw new YandexDiskException("DestinationPath Must be Folder Path", 889); }
 
             var parameters = new Dictionary<string, string>
             {
@@ -243,9 +246,9 @@ namespace YandexDiskSDK
                 { "fields", "path" }
             };
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                var RequestUri = new Base.pUri("resources", parameters);
+                var RequestUri = new pUri("resources", parameters);
                 using (HttpResponseMessage response = await localHttpClient.PutAsync(RequestUri, null).ConfigureAwait(false))
                 {
                     string result = await response.Content.ReadAsStringAsync();
@@ -255,7 +258,7 @@ namespace YandexDiskSDK
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }
@@ -266,13 +269,13 @@ namespace YandexDiskSDK
         #region _GetDownloadUrl
         public async Task<string> F_GetDownloadUrl()
         {
-            if (!System.IO.Path.HasExtension(this.Path)) {throw new YandexDiskException("DestinationPath Must be File Path", 888);}
+            if (!System.IO.Path.HasExtension(Path)) { throw new YandexDiskException("DestinationPath Must be File Path", 888); }
 
-            var parameters = new Dictionary<string, string>{{ "path", Path },{ "fields", "_embedded" }};
+            var parameters = new Dictionary<string, string> { { "path", Path }, { "fields", "_embedded" } };
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                using (HttpResponseMessage response = await localHttpClient.GetAsync(new Base.pUri("resources/download", parameters)).ConfigureAwait(false))
+                using (HttpResponseMessage response = await localHttpClient.GetAsync(new pUri("resources/download", parameters)).ConfigureAwait(false))
                 {
                     string result = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == HttpStatusCode.OK)
@@ -281,7 +284,7 @@ namespace YandexDiskSDK
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }
@@ -294,13 +297,9 @@ namespace YandexDiskSDK
         {
             var parameters = new Dictionary<string, string> { { "path", Path }, { "fields", "path" }, { "limit", "0" }, { "offset", "0" }, { "preview_crop", "true" }, { "sort", "path" } };
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                using (HttpResponseMessage response = await localHttpClient.SendAsync(new HttpRequestMessage
-                {
-                    Method = new HttpMethod("HEAD"),
-                    RequestUri = new Base.pUri("resources", parameters)
-                }, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false))
+                using (HttpResponseMessage response = await localHttpClient.SendAsync(new HttpRequestMessage { Method = new HttpMethod("HEAD"), RequestUri = new pUri("resources", parameters) }, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false))
                 {
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
@@ -325,9 +324,9 @@ namespace YandexDiskSDK
         {
             var parameters = new Dictionary<string, string> { { "path", Path }, { "fields", utilitiez.Fields.path.ToString() } };
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                var HtpReqMessage = new HttpRequestMessage(new HttpMethod("PATCH"), new Base.pUri("resources", parameters));
+                var HtpReqMessage = new HttpRequestMessage(new HttpMethod("PATCH"), new pUri("resources", parameters));
                 HtpReqMessage.Content = new StringContent(JsonConvert.SerializeObject(new { custom_properties = JsonObject }), System.Text.Encoding.UTF8, "application/json");
                 using (HttpResponseMessage response = await localHttpClient.SendAsync(HtpReqMessage, HttpCompletionOption.ResponseContentRead).ConfigureAwait(false))
                 {
@@ -338,7 +337,7 @@ namespace YandexDiskSDK
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return false;
                     }
                 }
@@ -353,9 +352,9 @@ namespace YandexDiskSDK
         {
             var parameters = new Dictionary<string, string> { { "path", Path } };
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                var RequestUri = new Base.pUri((Privacy == utilitiez.PrivacyEnum.Public) ? "resources/publish" : "resources/unpublish", parameters);
+                var RequestUri = new pUri((Privacy == utilitiez.PrivacyEnum.Public) ? "resources/publish" : "resources/unpublish", parameters);
                 using (HttpResponseMessage response = await localHttpClient.PutAsync(RequestUri, null).ConfigureAwait(false))
                 {
                     if (response.StatusCode == HttpStatusCode.OK)
@@ -365,7 +364,7 @@ namespace YandexDiskSDK
                     else
                     {
                         string result = await response.Content.ReadAsStringAsync();
-                        Base.ShowError(result);
+                        ShowError(result);
                         return false;
                     }
                 }
@@ -377,27 +376,29 @@ namespace YandexDiskSDK
 
         public async Task<JSON_MixedMetadata> FD_Metadata(bool PreviewCrop = true, utilitiez.PreviewSizeEnum PreviewSize = utilitiez.PreviewSizeEnum.S_150)
         {
-            var parameters = new Dictionary<string, string>();
-            parameters.Add("path", this.Path);
-            parameters.Add("limit", "0");
-            parameters.Add("offset", "0");
-            parameters.Add("preview_crop", PreviewCrop.ToString());
-            parameters.Add("preview_size", utilitiez.stringValueOf(PreviewSize));
-            parameters.Add("sort", "path");
-            parameters.Add("fields", "items");
-           
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            var parameters = new Dictionary<string, string>
             {
-                using (HttpResponseMessage response = await localHttpClient.GetAsync(new Base.pUri("resources", parameters)).ConfigureAwait(false))
+                { "path", Path },
+                { "limit", "0" },
+                { "offset", "0" },
+                { "preview_crop", PreviewCrop.ToString() },
+                { "preview_size", utilitiez.stringValueOf(PreviewSize) },
+                { "sort", "path" },
+                { "fields", "items" }
+            };
+
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
+            {
+                using (HttpResponseMessage response = await localHttpClient.GetAsync(new pUri("resources", parameters)).ConfigureAwait(false))
                 {
                     string result = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        return  JsonConvert.DeserializeObject<JSON_MixedMetadata>(result, Base.JSONhandler);
+                        return JsonConvert.DeserializeObject<JSON_MixedMetadata>(result, JSONhandler);
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }
@@ -408,31 +409,30 @@ namespace YandexDiskSDK
         #region DownloadFile
         public async Task F_Download(string FileSaveDir, IProgress<ReportStatus> ReportCls = null, CancellationToken token = default(CancellationToken))
         {
-           if( ReportCls == null) ReportCls = new Progress<ReportStatus>();
-            ReportCls.Report(new ReportStatus{Finished = false,TextStatus = "Initializing..."});
+            ReportCls = ReportCls ?? new Progress<ReportStatus>();
+            ReportCls.Report(new ReportStatus { Finished = false, TextStatus = "Initializing..." });
             try
             {
-                var progressHandler = new ProgressMessageHandler(new Base.HCHandler());
-                progressHandler.HttpReceiveProgress += (sender, e) =>ReportCls.Report(new ReportStatus { ProgressPercentage = e.ProgressPercentage, BytesTransferred = e.BytesTransferred, TotalBytes = e.TotalBytes, TextStatus = "Downloading..." });
-                                                            
-                var localHttpClient = new Base.HttpClient(progressHandler);
+                var progressHandler = new ProgressMessageHandler(new HCHandler());
+                progressHandler.HttpReceiveProgress += (sender, e) => { ReportCls.Report(new ReportStatus { ProgressPercentage = e.ProgressPercentage, BytesTransferred = e.BytesTransferred, TotalBytes = e.TotalBytes ?? 0, TextStatus = "Downloading..." }); };
+                var localHttpClient = new HtpClient(progressHandler);
 
-                var client = new YandexDiskSDK.YClient(Base.authToken, Base.ConnectionSetting);
-                var RequestUri = new Uri(await client.Item (this.Path).F_GetDownloadUrl());
-                
+                var client = new YClient(authToken, ConnectionSetting);
+                var RequestUri = new Uri(await client.Item(Path).F_GetDownloadUrl());
+
                 using (HttpResponseMessage ResPonse = await localHttpClient.GetAsync(RequestUri, HttpCompletionOption.ResponseContentRead, token).ConfigureAwait(false))
                 {
                     if (ResPonse.IsSuccessStatusCode)
                     {
-                        ReportCls.Report(new ReportStatus{Finished = true,TextStatus = string.Format("[{0}] Downloaded successfully.", System.IO.Path.GetFileName(this.Path))});
+                        ReportCls.Report(new ReportStatus { Finished = true, TextStatus = string.Format("[{0}] Downloaded successfully.", System.IO.Path.GetFileName(Path)) });
                     }
                     else
                     {
-                        ReportCls.Report(new ReportStatus{Finished = true,TextStatus = string.Format("Error code: {0}", ResPonse.StatusCode)});
+                        ReportCls.Report(new ReportStatus { Finished = true, TextStatus = string.Format("Error code: {0}", ResPonse.StatusCode) });
                     }
                     ResPonse.EnsureSuccessStatusCode();
                     Stream stream_ = await ResPonse.Content.ReadAsStreamAsync();
-                    var FPathname  = System.IO.Path.Combine (FileSaveDir,  System.IO.Path.GetFileName(Path));
+                    var FPathname = System.IO.Path.Combine(FileSaveDir, System.IO.Path.GetFileName(Path));
                     using (FileStream fileStream = new FileStream(FPathname, FileMode.Append, FileAccess.Write))
                     {
                         stream_.CopyTo(fileStream);
@@ -452,18 +452,17 @@ namespace YandexDiskSDK
         #endregion
 
         #region _DownloadLargeFile
-        public async Task F_DownloadLarge(string FileSaveDir, IProgress<ReportStatus> ReportCls = null, CancellationToken token = default(CancellationToken))
+        public async Task F_DownloadLarge(string FileSaveDir, IProgress<ReportStatus> ReportCls = null, CancellationToken token = default)
         {
-            if (ReportCls == null) ReportCls = new Progress<ReportStatus>();
+            ReportCls = ReportCls ?? new Progress<ReportStatus>();
             ReportCls.Report(new ReportStatus { Finished = false, TextStatus = "Initializing..." });
             try
             {
-                var progressHandler = new ProgressMessageHandler(new Base.HCHandler());
-                progressHandler.HttpReceiveProgress += (sender, e) => ReportCls.Report(new ReportStatus { ProgressPercentage = e.ProgressPercentage, BytesTransferred = e.BytesTransferred, TotalBytes = e.TotalBytes, TextStatus = "Downloading..." });
-
-                Base.HttpClient localHttpClient = new Base.HttpClient(progressHandler);
-                var client = new YandexDiskSDK.YClient(Base.authToken, Base.ConnectionSetting);
-                var RequestUri = new Uri(await client.Item(this.Path).F_GetDownloadUrl());
+                var progressHandler = new ProgressMessageHandler(new HCHandler());
+                progressHandler.HttpReceiveProgress += (sender, e) => { ReportCls.Report(new ReportStatus { ProgressPercentage = e.ProgressPercentage, BytesTransferred = e.BytesTransferred, TotalBytes = e.TotalBytes ?? 0, TextStatus = "Downloading..." }); };
+                HtpClient localHttpClient = new HtpClient(progressHandler);
+                var client = new YandexDiskSDK.YClient(authToken, ConnectionSetting);
+                var RequestUri = new Uri(await client.Item(Path).F_GetDownloadUrl());
 
                 using (HttpResponseMessage ResPonse = await localHttpClient.GetAsync(RequestUri, HttpCompletionOption.ResponseContentRead, token).ConfigureAwait(false))
                 {
@@ -471,7 +470,7 @@ namespace YandexDiskSDK
                     if (ResPonse.IsSuccessStatusCode)
                     {
                         ResPonse.EnsureSuccessStatusCode();
-                        string FPathname = System.IO.Path.Combine(FileSaveDir, System.IO.Path.GetFileName(this.Path));
+                        string FPathname = System.IO.Path.Combine(FileSaveDir, System.IO.Path.GetFileName(Path));
                         using (Stream streamToReadFrom = await ResPonse.Content.ReadAsStreamAsync())
                         {
                             using (Stream streamToWriteTo = File.Open(FPathname, FileMode.Create))
@@ -479,45 +478,45 @@ namespace YandexDiskSDK
                                 await streamToReadFrom.CopyToAsync(streamToWriteTo, 1024, token);
                             }
                         }
-                        ReportCls.Report(new ReportStatus{Finished = true,TextStatus = string.Format("[{0}] Downloaded successfully.", System.IO.Path.GetFileName(this.Path))});
+                        ReportCls.Report(new ReportStatus { Finished = true, TextStatus = string.Format("[{0}] Downloaded successfully.", System.IO.Path.GetFileName(Path)) });
                     }
                     else
                     {
-                        ReportCls.Report(new ReportStatus{Finished = true,TextStatus = string.Format("Error code: {0}", ResPonse.ReasonPhrase)});
+                        ReportCls.Report(new ReportStatus { Finished = true, TextStatus = string.Format("Error code: {0}", ResPonse.ReasonPhrase) });
                     }
                 }
             }
             catch (Exception ex)
             {
-                ReportCls.Report(new ReportStatus{Finished = true});
+                ReportCls.Report(new ReportStatus { Finished = true });
                 if (!ex.Message.ToString().ToLower().Contains("a task was canceled"))
                 {
                     throw ExceptionCls.CreateException(ex.Message, 1001);
                 }
-                ReportCls.Report(new ReportStatus{TextStatus = ex.Message});
+                ReportCls.Report(new ReportStatus { TextStatus = ex.Message });
             }
         }
         #endregion
 
         #region DownloadFileAsStream
-        public async Task<Stream> F_DownloadAsStream(IProgress<ReportStatus> ReportCls = null, CancellationToken token = default(CancellationToken))
+        public async Task<Stream> F_DownloadAsStream(IProgress<ReportStatus> ReportCls = null, CancellationToken token = default)
         {
-            if (ReportCls == null) ReportCls = new Progress<ReportStatus>();
+            ReportCls = ReportCls ?? new Progress<ReportStatus>();
             ReportCls.Report(new ReportStatus { Finished = false, TextStatus = "Initializing..." });
             try
             {
-                var progressHandler = new ProgressMessageHandler(new Base.HCHandler());
-                progressHandler.HttpReceiveProgress += (sender, e) => ReportCls.Report(new ReportStatus { ProgressPercentage = e.ProgressPercentage, BytesTransferred = e.BytesTransferred, TotalBytes = e.TotalBytes, TextStatus = "Downloading..." });
+                var progressHandler = new ProgressMessageHandler(new HCHandler());
+                progressHandler.HttpReceiveProgress += (sender, e) => { ReportCls.Report(new ReportStatus { ProgressPercentage = e.ProgressPercentage, BytesTransferred = e.BytesTransferred, TotalBytes = e.TotalBytes ?? 0, TextStatus = "Downloading..." }); };
 
-                Base.HttpClient localHttpClient = new Base.HttpClient(progressHandler);
-                var client = new YandexDiskSDK.YClient(Base.authToken, Base.ConnectionSetting);
-                var RequestUri = new Uri(await client.Item(this.Path).F_GetDownloadUrl());
+                HtpClient localHttpClient = new HtpClient(progressHandler);
+                var client = new YClient(authToken, ConnectionSetting);
+                var RequestUri = new Uri(await client.Item(Path).F_GetDownloadUrl());
 
                 using (HttpResponseMessage ResPonse = await localHttpClient.GetAsync(RequestUri, HttpCompletionOption.ResponseContentRead, token).ConfigureAwait(false))
                 {
                     if (ResPonse.IsSuccessStatusCode)
                     {
-                        ReportCls.Report(new ReportStatus { Finished = true, TextStatus = string.Format("[{0}] Downloaded successfully.", System.IO.Path.GetFileName(this.Path)) });
+                        ReportCls.Report(new ReportStatus { Finished = true, TextStatus = string.Format("[{0}] Downloaded successfully.", System.IO.Path.GetFileName(Path)) });
                     }
                     else
                     {
@@ -525,7 +524,7 @@ namespace YandexDiskSDK
                     }
                     ResPonse.EnsureSuccessStatusCode();
                     Stream stream_ = await ResPonse.Content.ReadAsStreamAsync();
-                    return  stream_;
+                    return stream_;
                 }
             }
             catch (Exception ex)
@@ -544,31 +543,30 @@ namespace YandexDiskSDK
         #region _DownloadFolderAsZip
         public async Task D_DownloadAsZip(string FileSaveDir, IProgress<ReportStatus> ReportCls = null, CancellationToken token = default(CancellationToken))
         {
-            if (ReportCls == null) ReportCls = new Progress<ReportStatus>();
+            ReportCls = ReportCls ?? new Progress<ReportStatus>();
             ReportCls.Report(new ReportStatus { Finished = false, TextStatus = "Initializing..." });
             try
             {
-                var progressHandler = new ProgressMessageHandler(new Base.HCHandler());
-                progressHandler.HttpReceiveProgress += (sender, e) => ReportCls.Report(new ReportStatus { ProgressPercentage = e.ProgressPercentage, BytesTransferred = e.BytesTransferred, TotalBytes = e.TotalBytes, TextStatus = "Downloading..." });
-
-                Base.HttpClient localHttpClient = new Base.HttpClient(progressHandler);
-                var client = new YandexDiskSDK.YClient(Base.authToken, Base.ConnectionSetting);
-                var RequestUri = new Uri(await client.Item(this.Path).F_GetDownloadUrl());
+                var progressHandler = new ProgressMessageHandler(new HCHandler());
+                progressHandler.HttpReceiveProgress += (sender, e) => { ReportCls.Report(new ReportStatus { ProgressPercentage = e.ProgressPercentage, BytesTransferred = e.BytesTransferred, TotalBytes = e.TotalBytes ?? 0, TextStatus = "Downloading..." }); };
+                HtpClient localHttpClient = new HtpClient(progressHandler);
+                var client = new YandexDiskSDK.YClient(authToken, ConnectionSetting);
+                var RequestUri = new Uri(await client.Item(Path).F_GetDownloadUrl());
 
                 using (HttpResponseMessage ResPonse = await localHttpClient.GetAsync(RequestUri, HttpCompletionOption.ResponseContentRead, token).ConfigureAwait(false))
                 {
                     if (ResPonse.IsSuccessStatusCode)
                     {
-                        ReportCls.Report(new ReportStatus{Finished = true,TextStatus = string.Format("[{0}] Downloaded successfully.", System.IO.Path.GetFileName(this.Path))});
+                        ReportCls.Report(new ReportStatus { Finished = true, TextStatus = string.Format("[{0}] Downloaded successfully.", System.IO.Path.GetFileName(Path)) });
                     }
                     else
                     {
-                        ReportCls.Report(new ReportStatus{Finished = true,TextStatus = string.Format("Error code: {0}", ResPonse.StatusCode)});
+                        ReportCls.Report(new ReportStatus { Finished = true, TextStatus = string.Format("Error code: {0}", ResPonse.StatusCode) });
                     }
                     ResPonse.EnsureSuccessStatusCode();
                     Stream stream_ = await ResPonse.Content.ReadAsStreamAsync();
-                    var FPathname = System.IO.Path.Combine(FileSaveDir,  System.IO.Path.GetFileNameWithoutExtension(Path) + ".ZIP");
-                    
+                    var FPathname = System.IO.Path.Combine(FileSaveDir, System.IO.Path.GetFileNameWithoutExtension(Path) + ".ZIP");
+
                     using (FileStream fileStream = new FileStream(FPathname, FileMode.Append, FileAccess.Write))
                     {
                         stream_.CopyTo(fileStream);
@@ -590,31 +588,30 @@ namespace YandexDiskSDK
         #region GET_File_Preview
         public async Task<byte[]> F_GetThumbnail(Uri PreviewURL, IProgress<ReportStatus> ReportCls = null, CancellationToken token = default(CancellationToken))
         {
-            if (ReportCls == null) ReportCls = new Progress<ReportStatus>();
+            ReportCls = ReportCls ?? new Progress<ReportStatus>();
             ReportCls.Report(new ReportStatus { Finished = false, TextStatus = "Initializing..." });
             try
             {
-                var progressHandler = new ProgressMessageHandler(new Base.HCHandler());
-                progressHandler.HttpReceiveProgress += (sender, e) => ReportCls.Report(new ReportStatus { ProgressPercentage = e.ProgressPercentage, BytesTransferred = e.BytesTransferred, TotalBytes = e.TotalBytes, TextStatus = "Downloading..." });
-
-                var localHttpClient = new Base.HttpClient(progressHandler);
+                var progressHandler = new ProgressMessageHandler(new HCHandler());
+                progressHandler.HttpReceiveProgress += (sender, e) => { ReportCls.Report(new ReportStatus { ProgressPercentage = e.ProgressPercentage, BytesTransferred = e.BytesTransferred, TotalBytes = e.TotalBytes ?? 0, TextStatus = "Downloading..." }); };
+                var localHttpClient = new HtpClient(progressHandler);
                 localHttpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/octet-stream");
                 HttpRequestMessage HtpReqMessage = new HttpRequestMessage(HttpMethod.Get, PreviewURL);
                 HttpResponseMessage ResPonse = await localHttpClient.GetAsync(HtpReqMessage.RequestUri, HttpCompletionOption.ResponseContentRead, token).ConfigureAwait(false);
                 if (ResPonse.IsSuccessStatusCode)
                 {
-                    ReportCls.Report(new ReportStatus{Finished = true,TextStatus = "Downloaded successfully."});
+                    ReportCls.Report(new ReportStatus { Finished = true, TextStatus = "Downloaded successfully." });
                 }
                 else
                 {
-                    ReportCls.Report(new ReportStatus{Finished = true,TextStatus = string.Format("Error code: {0}", ResPonse.ReasonPhrase)});
+                    ReportCls.Report(new ReportStatus { Finished = true, TextStatus = string.Format("Error code: {0}", ResPonse.ReasonPhrase) });
                 }
                 ResPonse.EnsureSuccessStatusCode();
                 Stream stream_ = await ResPonse.Content.ReadAsStreamAsync();
                 using (MemoryStream ms = new MemoryStream())
                 {
                     await stream_.CopyToAsync(ms);
-                    return  ms.ToArray();
+                    return ms.ToArray();
                 }
             }
             catch (Exception ex)
@@ -635,22 +632,24 @@ namespace YandexDiskSDK
         #region Get_UploadUrl
         private async Task<string> Get_UploadUrl(string FileName, bool OverwriteIfExist = false)
         {
-            var parameters = new Dictionary<string, string>();
-            parameters.Add("path", Hyperlink .Combine(new string[]{this.Path,FileName}));
-            parameters.Add("overwrite", OverwriteIfExist.ToString());
-        
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            var parameters = new Dictionary<string, string>
             {
-                using (HttpResponseMessage response = await localHttpClient.GetAsync(new Base.pUri("resources/upload", parameters)).ConfigureAwait(false))
+                { "path", Hyperlink.Combine(new string[] { Path, FileName }) },
+                { "overwrite", OverwriteIfExist.ToString() }
+            };
+
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
+            {
+                using (HttpResponseMessage response = await localHttpClient.GetAsync(new pUri("resources/upload", parameters)).ConfigureAwait(false))
                 {
                     string result = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        return  result.Jobj().SelectToken("href").ToString();
+                        return result.Jobj().SelectToken("href").ToString();
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }
@@ -659,19 +658,18 @@ namespace YandexDiskSDK
         #endregion
 
         #region Get_UploadLocal
-
         public async Task D_Upload(object FileToUpload, utilitiez.UploadTypes UploadType, string FileName, bool OverwriteIfExist = false, IProgress<ReportStatus> ReportCls = null, CancellationToken token = default(CancellationToken))
         {
-            if (ReportCls == null) ReportCls = new Progress<ReportStatus>();
+            ReportCls = ReportCls ?? new Progress<ReportStatus>();
             ReportCls.Report(new ReportStatus { Finished = false, TextStatus = "Initializing..." });
             try
             {
-                ProgressMessageHandler progressHandler = new ProgressMessageHandler(new Base.HCHandler());
-                progressHandler.HttpSendProgress += (sender, e) => ReportCls.Report(new ReportStatus { ProgressPercentage = e.ProgressPercentage, BytesTransferred = e.BytesTransferred, TotalBytes = e.TotalBytes, TextStatus = "Uploading..." });
-                                                        
-                Base.HttpClient localHttpClient = new Base.HttpClient(progressHandler);
-                HttpRequestMessage HtpReqMessage = new HttpRequestMessage();
-                HtpReqMessage.Method = HttpMethod.Put;
+                ProgressMessageHandler progressHandler = new ProgressMessageHandler(new HCHandler());
+                progressHandler.HttpSendProgress += (sender, e) => { ReportCls.Report(new ReportStatus { ProgressPercentage = e.ProgressPercentage, BytesTransferred = e.BytesTransferred, TotalBytes = e.TotalBytes ?? 0, TextStatus = "Uploading..." }); };
+
+                HtpClient localHttpClient = new HtpClient(progressHandler);
+                HttpRequestMessage HtpReqMessage = new HttpRequestMessage(HttpMethod.Put, new Uri(await Get_UploadUrl(FileName, OverwriteIfExist)));
+
                 switch (UploadType)
                 {
                     case utilitiez.UploadTypes.FilePath:
@@ -694,18 +692,16 @@ namespace YandexDiskSDK
                         }
                 }
 
-                HtpReqMessage.RequestUri = new Uri(await Get_UploadUrl(FileName, OverwriteIfExist));
-
                 using (HttpResponseMessage ResPonse = await localHttpClient.SendAsync(HtpReqMessage, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false))
                 {
                     token.ThrowIfCancellationRequested();
                     if (ResPonse.IsSuccessStatusCode)
                     {
-                        ReportCls.Report(new ReportStatus{Finished = true,TextStatus = "Upload completed successfully"});
+                        ReportCls.Report(new ReportStatus { Finished = true, TextStatus = "Upload completed successfully" });
                     }
                     else
                     {
-                        ReportCls.Report(new ReportStatus{Finished = true,TextStatus = string.Format("The request returned with HTTP status code {0}", ResPonse.ReasonPhrase)});
+                        ReportCls.Report(new ReportStatus { Finished = true, TextStatus = string.Format("The request returned with HTTP status code {0}", ResPonse.ReasonPhrase) });
                     }
                 }
             }
@@ -727,27 +723,29 @@ namespace YandexDiskSDK
 
         public async Task<string> D_UploadRemotely(Uri FileUrl, string FileName = null, bool DisableRedirects = false)
         {
-            var parameters = new Dictionary<string, string>();
-            parameters.Add("path", Hyperlink .Combine(new string[]{this.Path,string.IsNullOrEmpty(FileName) ? System.IO.Path.GetFileName(FileUrl.ToString()) : FileName}));
-            parameters.Add("url", FileUrl.ToString());
-            parameters.Add("disable_redirects", DisableRedirects.ToString());
-           
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            var parameters = new Dictionary<string, string>
             {
-                using (HttpResponseMessage response = await localHttpClient.GetAsync(new Base.pUri("resources/upload", parameters)).ConfigureAwait(false))
+                { "path", Hyperlink.Combine(new string[] { Path, string.IsNullOrEmpty(FileName) ? System.IO.Path.GetFileName(FileUrl.ToString()) : FileName }) },
+                { "url", FileUrl.ToString() },
+                { "disable_redirects", DisableRedirects.ToString() }
+            };
+
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
+            {
+                using (HttpResponseMessage response = await localHttpClient.GetAsync(new pUri("resources/upload", parameters)).ConfigureAwait(false))
                 {
                     string result = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        return  string.Format("https://cloud-api.yandex.net/v1/disk/operations?id={0}", result.Jobj().SelectToken("operation_id").ToString());
+                        return string.Format("https://cloud-api.yandex.net/v1/disk/operations?id={0}", result.Jobj().SelectToken("operation_id").ToString());
                     }
                     else if (response.StatusCode == HttpStatusCode.Accepted)
                     {
-                        return  result.Jobj().SelectToken("href").ToString();
+                        return result.Jobj().SelectToken("href").ToString();
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }

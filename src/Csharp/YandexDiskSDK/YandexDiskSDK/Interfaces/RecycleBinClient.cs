@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using YandexDiskSDK.JSON;
+using static YandexDiskSDK.Basic;
 using static YandexDiskSDK.utilitiez;
 
 namespace YandexDiskSDK
@@ -34,9 +35,9 @@ namespace YandexDiskSDK
                 { "sort", "deleted" }// available choices are deleted, created, -deleted, -created.
             };
 
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                using (HttpResponseMessage response = await localHttpClient.GetAsync(new Base.pUri("trash/resources", parameters)).ConfigureAwait(false))
+                using (HttpResponseMessage response = await localHttpClient.GetAsync(new pUri("trash/resources", parameters)).ConfigureAwait(false))
                 {
                     var result = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == HttpStatusCode.OK)
@@ -45,13 +46,13 @@ namespace YandexDiskSDK
                         fin.limit = Convert.ToInt32(result.Jobj().SelectToken("_embedded.limit").ToString());
                         fin.offset = Convert.ToInt32(result.Jobj().SelectToken("_embedded.offset").ToString());
                         fin.total = Convert.ToInt32(result.Jobj().SelectToken("_embedded.total").ToString());
-                        fin._Files = (from c in result.Jobj().SelectToken("_embedded")["items"].ToList().Select((i, JSON_FileMetadata) => i).Where(i => i.SelectToken("type").ToString().Equals("file")).Select(i => JsonConvert.DeserializeObject<JSON_FileMetadata>(i.ToString(), Base.JSONhandler)) select c).ToList();
-                        fin._Folders = (from c in result.Jobj().SelectToken("_embedded")["items"].ToList().Select((i, JSON_FolderMetadata) => i).Where(i => i.SelectToken("type").ToString().Equals("dir")).Select(i => JsonConvert.DeserializeObject<JSON_FolderMetadata>(i.ToString(), Base.JSONhandler)) select c).ToList();
+                        fin._Files = (from c in result.Jobj().SelectToken("_embedded")["items"].ToList().Select((i, JSON_FileMetadata) => i).Where(i => i.SelectToken("type").ToString().Equals("file")).Select(i => JsonConvert.DeserializeObject<JSON_FileMetadata>(i.ToString(), JSONhandler)) select c).ToList();
+                        fin._Folders = (from c in result.Jobj().SelectToken("_embedded")["items"].ToList().Select((i, JSON_FolderMetadata) => i).Where(i => i.SelectToken("type").ToString().Equals("dir")).Select(i => JsonConvert.DeserializeObject<JSON_FolderMetadata>(i.ToString(), JSONhandler)) select c).ToList();
                         return fin;
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return null;
                     }
                 }
@@ -62,9 +63,9 @@ namespace YandexDiskSDK
         #region "Empty TrashBin"
         public async Task<bool> EmptyTrashBin()
         {
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
-                using (HttpResponseMessage response = await localHttpClient.DeleteAsync(new Base.pUri("trash/resources")).ConfigureAwait(false))
+                using (HttpResponseMessage response = await localHttpClient.DeleteAsync(new pUri("trash/resources")).ConfigureAwait(false))
                 {
                     var result = await response.Content.ReadAsStringAsync();
 
@@ -74,7 +75,7 @@ namespace YandexDiskSDK
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return false;
                     }
                 }
@@ -91,10 +92,10 @@ namespace YandexDiskSDK
                 { "name", RenameTo },
                 { "overwrite", OverwriteIfExist.ToString() }
             };
-            using (Base.HttpClient localHttpClient = new Base.HttpClient(new Base.HCHandler()))
+            using (HtpClient localHttpClient = new HtpClient(new HCHandler()))
             {
                 var HtpReqMessage = new HttpRequestMessage();
-                using (HttpResponseMessage response = await localHttpClient.PutAsync(new Base.pUri("trash/resources/restore", parameters), null).ConfigureAwait(false))
+                using (HttpResponseMessage response = await localHttpClient.PutAsync(new pUri("trash/resources/restore", parameters), null).ConfigureAwait(false))
                 {
                     var result = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == HttpStatusCode.Created || response.StatusCode == HttpStatusCode.Accepted)
@@ -103,7 +104,7 @@ namespace YandexDiskSDK
                     }
                     else
                     {
-                        Base.ShowError(result);
+                        ShowError(result);
                         return false;
                     }
 

@@ -8,7 +8,7 @@ using static YandexDiskSDK.utilitiez;
 
 namespace YandexDiskSDK
 {
-    internal static class Base
+    public  static class Basic
     {
 
         public static string APIbase = "https://cloud-api.yandex.net/v1/disk/";
@@ -45,9 +45,9 @@ namespace YandexDiskSDK
             }
         }
 
-        public class HttpClient : System.Net.Http.HttpClient
+        public class HtpClient : System.Net.Http.HttpClient
         {
-            public HttpClient(HCHandler HCHandler) : base(HCHandler)
+            public HtpClient(HCHandler HCHandler) : base(HCHandler)
             {
                 base.DefaultRequestHeaders.UserAgent.ParseAdd("YandexDiskSDK");
                 base.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("OAuth", authToken);
@@ -55,7 +55,7 @@ namespace YandexDiskSDK
                 base.DefaultRequestHeaders.ConnectionClose = m_CloseConnection;
                 base.Timeout = m_TimeOut;
             }
-            public HttpClient(System.Net.Http.Handlers.ProgressMessageHandler progressHandler) : base(progressHandler)
+            public HtpClient(System.Net.Http.Handlers.ProgressMessageHandler progressHandler) : base(progressHandler)
             {
                 base.DefaultRequestHeaders.UserAgent.ParseAdd("YandexDiskSDK");
                 base.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("OAuth", authToken);
@@ -67,7 +67,7 @@ namespace YandexDiskSDK
 
         public class pUri : Uri
         {
-            public pUri(string ApiAction, System.Collections.Generic.Dictionary<string, string> Parameters = null) : base(Base.APIbase + ApiAction + ((Parameters == null) ? null : utilitiez.AsQueryString(Parameters))){}
+            public pUri(string ApiAction, System.Collections.Generic.Dictionary<string, string> Parameters = null) : base(Basic.APIbase + ApiAction + ((Parameters == null) ? null : utilitiez.AsQueryString(Parameters))){}
         }
 
         public static void  ShowError(string result)
