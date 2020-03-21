@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>YandexDiskSDK is a .Net library for Disk.Yandex.com file hosting service.</Description>
+    <Copyright>Copyright © 2019 DeQmaTech LLC.</Copyright>
+    <AssemblyTitle>YandexDiskSDK</AssemblyTitle>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <VersionPrefix>3.4.0</VersionPrefix>
+    <Title>YandexDiskSDK</Title>
+    <Authors>DeQmaTech LLC.</Authors>
+    <AssemblyName>YandexDiskSDK</AssemblyName>
+    <PackageProjectUrl>https://github.com/jamesheck2019/YandexDiskSDK</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/jamesheck2019/YandexDiskSDK/LICENSE</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageTags>YandexDisk;netstandard;cloud-storage</PackageTags>
+    <RepositoryUrl>https://github.com/jamesheck2019/YandexDiskSDK</RepositoryUrl>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RootNamespace>YandexDiskSDK</RootNamespace>
+    <TargetFrameworks>netstandard2.0;netcoreapp2.1;net452</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>DeQmaTech.YandexDiskSDK</PackageId>
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.3" />
+  </ItemGroup>
+
+</Project>
